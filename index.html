@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+        <head>
+                <meta charset="utf-8">
+                <link href="lib/nv.d3.css" rel="stylesheet" type="text/css">
+
+                <script src="lib/bowser.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+                <script src="lib/nv.d3.js"></script>
+                <script src="lib/stream_layers.js"></script>
+
+                <style>
+                        /* http://meyerweb.com/eric/tools/css/reset/
+                           v2.0 | 20110126
+                           License: none (public domain)
+                        */
+
+                        html, body, div, span, applet, object, iframe,
+                        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+                        a, abbr, acronym, address, big, cite, code,
+                        del, dfn, em, img, ins, kbd, q, s, samp,
+                        small, strike, strong, sub, sup, tt, var,
+                        b, u, i, center,
+                        dl, dt, dd, ol, ul, li,
+                        fieldset, form, label, legend,
+                        table, caption, tbody, tfoot, thead, tr, th, td,
+                        article, aside, canvas, details, embed,
+                        figure, figcaption, footer, header, hgroup,
+                        menu, nav, output, ruby, section, summary,
+                        time, mark, audio, video {
+                                margin: 0;
+                                padding: 0;
+                                border: 0;
+                                font-size: 100%;
+                                font: inherit;
+                                vertical-align: baseline;
+                        }
+                        /* HTML5 display-role reset for older browsers */
+                        article, aside, details, figcaption, figure,
+                        footer, header, hgroup, menu, nav, section {
+                                display: block;
+                        }
+                        body {
+                                line-height: 1;
+                        }
+                        ol, ul {
+                                list-style: none;
+                        }
+                        blockquote, q {
+                                quotes: none;
+                        }
+                        blockquote:before, blockquote:after,
+                        q:before, q:after {
+                                content: '';
+                                content: none;
+                        }
+                        table {
+                                border-collapse: collapse;
+                                border-spacing: 0;
+                        }
+
+                        /* END OF CSS RESET BY MEYERWEB */
+
+                        text {
+                                font: 12px sans-serif;
+                        }
+                        html, body, #chart1, svg {
+                                margin: 0px;
+                                padding: 0px;
+                                height: 100%;
+                                width: 100%;
+                        }
+                        html *, body * {
+                                box-sizing: border-box;
+                        }
+                        #chart1, svg {
+                                height: calc(100vh - 84px);
+                        }
+                        svg {
+                                display: block;
+                        }
+                        nav {
+                                background-color: aliceblue;
+                                height: 25px;
+                                padding: 10px 0 30px 0;
+                        }
+                        hr {
+                                padding: 0;
+                                margin: 0;
+                        }
+                        .active {
+
+                        }
+                </style>
+        </head>
+
+        <body>
+                <nav id="tests">
+                        <button class="testHarness" data-points="5">Load 5 Data Points</button>
+                        <button class="testHarness" data-points="250">Load 250 Data Points</button>
+                        <button class="testHarness" data-points="1000">Load 1,000 Data Points</button>
+                        <button class="testHarness" data-points="5000">Load 5,000 Data Points</button>
+                        <button class="testHarness" data-points="25000">Load 25,000 Data Points</button>
+                </nav>
+                <hr />
+
+                <div id="chart1" class='with-3d-shadow with-transitions'><svg id="svg"></svg></div>
+
+                <hr />
+                <nav>
+                        &nbsp;<span id="render_results">...</span>
+                </nav>
+
+                <script type="text/javascript">
+                        var data = {},
+                        setUp = function(cb) {
+                                var testHarnessData = document.getElementsByClassName("testHarness");
+
+                                for(var i = 0; i < testHarnessData.length; i++) {
+                                        data[testHarnessData[i].dataset.points] = produceTestData(testHarnessData[i].dataset.points);
+                                }
+                                cb();
+                        },
+                        produceTestData = function(points) {
+                                return stream_layers(3, points, .1).map(function(data, i) {
+                                        return {
+                                                key: 'Stream' + i,
+                                                values: data
+                                        };
+                                });
+                        },
+                        produceEngine = function() {
+                                var name = bowser.name,
+                                        version = bowser.version,
+                                        renderingEngine,
+                                        device,
+                                        browser,
+                                        os;
+
+                                // rendering engine
+                                if (bowser.webkit) {
+                                        renderingEngine = "webkit";
+                                } else if (bowser.blink) {
+                                        renderingEngine = "blink";
+                                } else if (bowser.gecko) {
+                                        renderingEngine = "gecko";
+                                } else if (bowser.msie) {
+                                        renderingEngine = "msie";
+                                } else if (bowser.msedge) {
+                                        renderingEngine = "msedge";
+                                } else {
+                                        renderingEngine = "unknown";
+                                }
+
+                                // device
+                                if (bowser.mobile) {
+                                        device = "mobile";
+                                } else if (bowser.tablet) {
+                                        device = "tablet";
+                                } else {
+                                        device = "desktop";
+                                }
+
+                                // browser
+                                if (bowser.chrome) {
+                                        browser = "chrome";
+                                } else if (bowser.firefox) {
+                                        browser = "firefox";
+                                } else if (bowser.msie) {
+                                        browser = "msie";
+                                } else if (bowser.msedge) {
+                                        browser = "msedge";
+                                } else if (bowser.safari) {
+                                        browser = "safari";
+                                } else if (bowser.android) {
+                                        browser = "android";
+                                } else if (bowser.ios) {
+                                        browser = "ios";
+                                } else if (bowser.opera) {
+                                        browser = "opera";
+                                } else if (bowser.samsungBrowser) {
+                                        browser = "samsungBrowser";
+                                } else if (bowser.phantom) {
+                                        browser = "phantom";
+                                } else if (bowser.blackberry) {
+                                        browser = "blackberry";
+                                } else if (bowser.webos) {
+                                        browser = "webos";
+                                } else if (bowser.silk) {
+                                        browser = "silk";
+                                } else if (bowser.bada) {
+                                        browser = "bada";
+                                } else if (bowser.tizen) {
+                                        browser = "tizen";
+                                } else if (bowser.seamonkey) {
+                                        browser = "seamonkey";
+                                } else if (bowser.sailfish) {
+                                        browser = "sailfish";
+                                } else if (bowser.ucbrowser) {
+                                        browser = "ucbrowser";
+                                } else if (bowser.qupzilla) {
+                                        browser = "qupzilla";
+                                } else if (bowser.vivaldi) {
+                                        browser = "vivaldi";
+                                } else if (bowser.sleipnir) {
+                                        browser = "sleipnir";
+                                } else if (bowser.kMeleon) {
+                                        browser = "kMeleon";
+                                } else {
+                                        browser = "unknown";
+                                }
+
+                                // os
+                                if (bowser.mac) {
+                                        os = "mac";
+                                } else if (bowser.windows) {
+                                        os = "windows";
+                                } else if (bowser.windowsphone) {
+                                        os = "windowsphone";
+                                } else if (bowser.linux) {
+                                        os = "linux";
+                                } else if (bowser.chromeos) {
+                                        os = "chromeos";
+                                } else if (bowser.android) {
+                                        os = "android";
+                                } else if (bowser.ios) {
+                                        os = "ios";
+                                } else if (bowser.blackberry) {
+                                        os = "blackberry";
+                                } else if (bowser.firefoxos) {
+                                        os = "firefoxos";
+                                } else if (bowser.webos) {
+                                        os = "webos";
+                                } else if (bowser.bada) {
+                                        os = "bada";
+                                } else if (bowser.tizen) {
+                                        os = "tizen";
+                                } else if (bowser.sailfish) {
+                                        os = "sailfish";
+                                } else {
+                                        os ="unknown";
+                                }
+
+                                return "Rendering results test using the <strong>" + renderingEngine + " engine</strong> on a <strong>" + os + " operating system</strong> and a <strong>" + device + " device</strong> with a <strong>" + browser + " browser</strong>";
+                        },
+                        points = 5,
+                        start,
+                        end,
+                        dataEnd,
+                        dataEndResult = 0,
+                        renderTime = function() {
+                                if (window.performance) return window.performance.now();
+                                return Date.now();
+                        };
+
+                        var chart,
+                                produceChart = function(cb) {
+                                        document.getElementById("svg").innerHTML = "";
+                                        document.getElementById("render_results").innerHTML = "...";
+                                        start = renderTime();
+                                        nv.addGraph(function() {
+                                                chart = nv.models.multiBarChart()
+                                                        .barColor(d3.scale.category20().range())
+                                                        .duration(300)
+                                                        .margin({bottom: 100, left: 70})
+                                                        .rotateLabels(45)
+                                                        .groupSpacing(0.1)
+                                                ;
+
+                                                chart.reduceXTicks(false).staggerLabels(true);
+                                                chart.xAxis
+                                                        .axisLabel("X Axis")
+                                                        .axisLabelDistance(35)
+                                                        .showMaxMin(false)
+                                                        .tickFormat(d3.format(',.6f'))
+                                                ;
+                                                chart.yAxis
+                                                        .axisLabel("Y Axis")
+                                                        .axisLabelDistance(-5)
+                                                        .tickFormat(d3.format(',.01f'))
+                                                ;
+
+                                                chart.dispatch.on('renderEnd', function(){
+                                                        end = renderTime();
+                                                        document.getElementById("render_results").innerHTML = produceEngine() + ": Data Processing = " + dataEndResult + "ms. Rendering = " + Math.round(end - dataEnd, 0) + "ms. Total Time = " + Math.round(end - start, 0) + "ms.";
+                                                });
+
+                                                d3.select('#chart1 svg').datum(data[points]).call(chart);
+                                                nv.utils.windowResize(function() {
+                                                        start = renderTime();
+                                                        dataEnd = renderTime();
+                                                        dataEndResult = 0;
+                                                        chart.update();
+                                                });
+
+                                                chart.dispatch.on('stateChange', function(e) {
+                                                        start = renderTime();
+                                                        dataEnd = renderTime();
+                                                        dataEndResult = 0;
+                                                });
+
+                                                chart.state.dispatch.on('change', function(state){
+                                                        start = renderTime();
+                                                        dataEnd = renderTime();
+                                                        dataEndResult = 0;
+                                                });
+
+                                                return chart;
+                                        },
+                                        cb);
+                                };
+
+                        var testButtons = document.getElementById("tests");
+
+                        testButtons.addEventListener("click", function(e) {
+                                points = e.target.dataset.points;
+                                produceChart(function(chart) {
+                                        dataEnd = renderTime();
+                                        dataEndResult = Math.round(dataEnd - start, 0);
+
+                                });
+                        }, false);
+
+
+                        setUp(
+                                function() {
+                                        produceChart(function(chart) {
+                                                dataEnd = renderTime();
+                                                dataEndResult = Math.round(dataEnd - start, 0);
+                                        });
+                                }
+                        );
+                </script>
+        </body>
+</html>
