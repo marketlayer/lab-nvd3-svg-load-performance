@@ -103,11 +103,7 @@
                                                                 // do nothing
                                                         } else {
                                                                 end = renderTime();
-                                                                if (data.length === 1) {
-                                                                        document.getElementById("render_results").innerHTML = produceEngine() + "<br /><strong>Total Points</strong> = " + totalPoints + ". <strong>Total Time</strong> = " + Math.round(end - start, 0) + "ms. <strong>Rendering</strong> = " + Math.round(end - dataEnd, 0) + "ms.";
-                                                                } else {
-                                                                        document.getElementById("render_results").innerHTML = produceEngine() + "<br /><strong>Total Points</strong> = " + totalPoints + ". <strong>Total Time</strong> = " + Math.round(end - start, 0) + "ms. <strong>Rendering</strong> = " + Math.round(end - dataEnd, 0) + "ms. <strong>Data</strong> = " + dataEndResult + "ms.";
-                                                                }
+                                                                document.getElementById("render_results").innerHTML = produceEngine() + "<br /><strong>Total Points</strong> = " + totalPoints + ". <strong>Total Time</strong> = " + Math.round(end - start, 0) + "ms. <strong>Rendering</strong> = " + Math.round(end - dataEnd, 0) + "ms. <strong>Data</strong> = " + dataEndResult + "ms.";
                                                                 toggleButtons(true);
                                                         }
                                                         renderEnds++;

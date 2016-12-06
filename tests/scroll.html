@@ -80,7 +80,7 @@
                                         nv.addGraph(function() {
                                                 chart = nv.models.multiBarChart()
                                                         .barColor(d3.scale.category20().range())
-                                                        .duration(0)
+                                                        .duration(1)
                                                         .margin({bottom: 100, left: 70})
                                                         .rotateLabels(45)
                                                         .groupSpacing(0.1)
@@ -123,16 +123,9 @@
                                                         charts.appendChild(svg);
 
                                                 d3.select('#chart_' + dataIndex + ' svg').datum(data[dataIndex]).call(chart);
-                                                // nv.utils.windowResize(function(e) {
-                                                //         console.log("running resize");
-                                                //         start = renderTime();
-                                                //         dataEnd = renderTime();
-                                                //         dataEndResult = 0;
-                                                //         //chart.update();
-                                                //         console.log("windowResize", e);
-                                                // });
                                                 allCharts.push(chart);
                                                 window.onresize = function(e) {
+                                                        clearTimeout(resizeTimer);
                                                         resizeTimer = setTimeout(function() {
                                                                 start = renderTime();
                                                                 dataEnd = renderTime();
